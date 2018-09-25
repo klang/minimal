@@ -101,16 +101,8 @@ Of course, 100% coverage isn't really possible, when we have selected to be able
 
 All this was inspired by this [blog post](https://blog.jetbrains.com/pycharm/2015/06/feature-spotlight-python-code-coverage-with-pycharm/) and adapted to the latest version of IntelliJ.
 
-# flask
-
-    pyenv virtualenv 3.6.5 baseline-flask
-    pyenv activate baseline-flask
-    export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    pip install Flask
-    FLASK_ENV=development FLASK_APP=mock-url-signer.py flask run
-
-    
-## flask-bootstrap and flask-socket
+   
+## frontend
 
 An example frontend is represented in `flask-bootstrap` and can be started with
 
