@@ -52,6 +52,16 @@ def create_app(configfile=None):
 
         return render_template('index.html', form=form)
 
+    @app.route('/sites', methods=('GET', 'POST'))
+    def sites():
+        import requests
+        import json
+        url="https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
+        r = requests.get(url)
+        sites = json.loads(r.text)
+        print(r.text)
+        return render_template('sites.html', sites=sites)
+
     return app
 
 

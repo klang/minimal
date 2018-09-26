@@ -1,0 +1,39 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages(dismissible=True)}}
+<div class="page-header">
+  <table class="table">
+    <thead>
+      <th>name</th>
+      <th>networks</th>
+      <th>email_ips</th>
+      <th>sccm_ips</th>
+      <th>tp_subnets</th>
+      <th>vtp_domain</th>
+      <th>vtp_enc_key</th>
+    </thead>
+    {% for site in sites %}
+      <tr>
+        <td>{{ site.name }}</td>
+        <td>{{ site.networks }}</td>
+        <td>{{ site.email_ips }}</td>
+        <td>{{ site.sccm_ips }}</td>
+        <td>{{ site.tp_subnets }}</td>
+        <td>{{ site.vtp_domain }}</td>
+        <td>{{ site.vtp_enc_key }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}
