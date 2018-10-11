@@ -17,7 +17,7 @@
       <th>vtp_enc_key</th>
     </thead>
     {% for site in sites %}
-      <tr>
+      <tr id="{{ site.name }}">
         <td>{{ site.name }}</td>
         <td>{{ site.networks }}</td>
         <td>{{ site.email_ips }}</td>
@@ -30,6 +30,7 @@
     </tbody>
   </table>
 </div>
+<div id="page"></div>
 
 {% endblock %}
 

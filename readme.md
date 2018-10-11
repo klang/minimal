@@ -104,7 +104,8 @@ All this was inspired by this [blog post](https://blog.jetbrains.com/pycharm/201
    
 ## frontend
 
-An example frontend is represented in `flask-bootstrap` and can be started with
+An example frontend is represented in `baseline-flask` and can be started with
 
+    pyenv activate baseline-flask
     flask --app=frontend dev -p 5000
         

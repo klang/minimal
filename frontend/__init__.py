@@ -6,6 +6,9 @@ from wtforms import TextField, StringField, BooleanField, SubmitField, validator
 from wtforms.validators import NumberRange
 from wtforms_components import IntegerField
 
+import requests
+import json
+from retrying import retry
 
 # straight from the wtforms docs:
 class TelephoneForm(Form):
@@ -27,6 +30,20 @@ class RouterConfigForm(Form):
     submit_button = SubmitField('Submit Form')
 
 
+def retry_if_HTTP404(exception):
+    return isinstance(exception, requests.exceptions.HTTPError) and exception.response.status_code == 404
+
+
+@retry(stop_max_attempt_number=5, wait_exponential_multiplier=100, retry_on_exception=retry_if_HTTP404)
+def get_url(url):
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        return r
+    except requests.exceptions.HTTPError as e:
+        raise e
+
+
 def create_app(configfile=None):
     app = Flask(__name__)
     AppConfig(app, configfile)  # Flask-Appconfig is not necessary, but
@@ -43,7 +60,6 @@ def create_app(configfile=None):
         print("configuring%s+%s" % (form.router.data, form.switch.data) + " with SNOW ID: %s " % (form.snow.data) + " %s APs" % (form.aps.data))
 
         if form.is_submitted():
-            import requests
             url="https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
             r = requests.get(url)
             print(r.text)
@@ -54,13 +70,58 @@ def create_app(configfile=None):
 
     @app.route('/sites', methods=('GET', 'POST'))
     def sites():
-        import requests
-        import json
-        url="https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
-        r = requests.get(url)
-        sites = json.loads(r.text)
-        print(r.text)
-        return render_template('sites.html', sites=sites)
+        url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
+        try:
+            r = get_url(url)
+            data= json.loads(r.text)
+        except requests.exceptions.HTTPError as e:
+            flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
+            data = []
+        print(data)
+        return render_template('sites.html', sites=data)
+
+    @app.route('/advanced-sites', methods=('GET', 'POST'))
+    def advanced_sites():
+        url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
+        try:
+            r = get_url(url)
+            data = json.loads(r.text)
+        except requests.exceptions.HTTPError as e:
+            flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
+            data = []
+        print(data)
+        if len(data) == 1:
+            print("WARNING: adding a bit of fake data for site")
+            data.append({'name': 'sample 1', 'networks': 'string', 'email_ips': 'string', 'sccm_ips': 'string', 'tp_subnets': 'string', 'vtp_domain': 'string', 'vtp_enc_key': 'string'})
+            data.append({'name': 'sample 2', 'networks': 'string', 'email_ips': 'string', 'sccm_ips': 'string', 'tp_subnets': 'string', 'vtp_domain': 'string', 'vtp_enc_key': 'string'})
+        vlans = {}
+        for site in data:
+            url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}/vlans".format(site['name'])
+            try:
+                r = get_url(url)
+                subdata = json.loads(r.text)
+                if len(subdata) == 1:
+                    print("WARNING: adding a bit of fake data for vlans at site")
+                    subdata.append({'vlan': 1, 'kind': 'string', 'description': 'string'})
+                    subdata.append({'vlan': 2, 'kind': 'string', 'description': 'string'})
+                    subdata.append({'vlan': 3, 'kind': 'string', 'description': 'string'})
+            except requests.exceptions.HTTPError as e:
+                subdata = []
+            vlans[site['name']] = subdata
+
+        return render_template('advanced-sites.html', sites=data, vlans=vlans)
+
+    @app.route('/devices', methods=('GET', 'POST'))
+    def devices():
+        url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/devices"
+        try:
+            r = get_url(url)
+            data = json.loads(r.text)
+        except requests.exceptions.HTTPError as e:
+            flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
+            data = []
+        print(data)
+        return render_template('devices.html', devices=data)
 
     return app
 

@@ -1,0 +1,32 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages(dismissible=True)}}
+<div class="page-header">
+  <table class="table">
+    <thead>
+      <th>name</th>
+      <th>ip</th>
+      <th>roles</th>
+    </thead>
+    {% for device in devices %}
+      <tr>
+        <td>{{ device.name }}</td>
+        <td>{{ device.ip }}</td>
+        <td>{{ device.roles }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div id="page">placeholder</div>
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

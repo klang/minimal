@@ -1,0 +1,71 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages(dismissible=True)}}
+<div class="page-header">
+  <table class="table">
+    <thead>
+    <th>name</th>
+    <th>networks</th>
+    <th>email_ips</th>
+    <th>sccm_ips</th>
+    <th>tp_subnets</th>
+    <th>vtp_domain</th>
+    <th>vtp_enc_key</th>
+    </thead>
+    {% for site in sites %}
+    <tr id="{{ site.name }}">
+      <td>
+        <div id="accordion">
+
+          <div class="card">
+            <div class="card-header" id="headingOne">
+              <h5 class="mb-0">
+                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse1{{loop.index}}" aria-expanded="false" aria-controls="collapse1{{loop.index}}">
+                  {{ site.name }}
+                </button>
+              </h5>
+            </div>
+            <div id="collapse1{{loop.index}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                  <th>vlan</th>
+                  <th>kind</th>
+                  <th>description</th>
+                  </thead>
+                  {% for vlan in vlans[site.name] %}
+                  <tr id="{{ vlan.vlan }}">
+                    <td>{{ vlan.vlan }}</td>
+                    <td>{{ vlan.kind }}</td>
+                    <td>{{ vlan.description }}</td>
+                  </tr>
+                  {% endfor %}
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </td>
+      <td>{{ site.networks }}</td>
+      <td>{{ site.email_ips }}</td>
+      <td>{{ site.sccm_ips }}</td>
+      <td>{{ site.tp_subnets }}</td>
+      <td>{{ site.vtp_domain }}</td>
+      <td>{{ site.vtp_enc_key }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}
