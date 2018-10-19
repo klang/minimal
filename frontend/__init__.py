@@ -35,6 +35,18 @@ class AddSiteForm(FlaskForm):
     ipphones = IntegerField('ipphones', description="Number physical IP Phones")
     submit_button = SubmitField('Submit Form')
 
+
+class Device(FlaskForm):
+    site_name = StringField('site_name', description="site name")
+    dev_cfg = StringField('dev_cfg', description="viable device configuration")
+    building = StringField('building', description="3 letter building name")
+    df = StringField('df', description="3 letter distribution frame - I01 for IDF01, M01 for MDF01")
+    serial = StringField('serial', description="Chassis serial number")
+    stack_partner = StringField('stack_partner', description="use the assigned host as the primary device in a stack, this host should join")
+    auto_connect = BooleanField('auto_connect', description="When true, connections to preexisting site devices will be automatically generated")
+    wan_line = StringField('wan_line', description="for dmvpn/mpls roles, a SNOW wan name to retrieve wan details")
+    submit_button = SubmitField('Submit Form')
+
 class AddDeviceConfigurationForm(FlaskForm):
     name = StringField('name')
     model = StringField('model')
@@ -119,6 +131,13 @@ def create_app(configfile=None):
             return render_template('scratch.html', form=form, form2=f2, sites=[data])
         return render_template('scratch.html', form=form, form2=f2)
 
+    @app.route('/device', methods=('GET', 'POST'))
+    def device():
+        form = Device()
+        form.validate_on_submit()
+        if form.is_submitted():
+            return render_template('device.html', form=form)
+        return render_template('device.html', form=form)
 
     @app.route('/site', methods=('GET', 'POST'))
     def site():
@@ -218,9 +237,10 @@ def create_app(configfile=None):
             flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
             data = []
         print(data)
-        data.append({'name': 'fake1', 'ip': '10.10.2.1', 'roles': 'fakeA'})
-        data.append({'name': 'fake2', 'ip': '10.10.2.2', 'roles': 'fakeB'})
-        data.append({'name': 'fake3', 'ip': '10.10.2.3', 'roles': 'fakeC'})
+
+        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
+        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
+        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
         return render_template('devices.html', devices=data)
 
     return app
