@@ -8,11 +8,8 @@
 {{util.flashed_messages(dismissible=True)}}
 <div class="container">
   <h1>search site</h1>
-  <form method="post" >
-    {{ form.csrf_token }}
-    {{ render_field(form.site) }}
-  <button type="submit" name="submit_button" class="btn btn-primary">Search</button>
-  </form>
+  {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
+
 </div>
 {% if data %}
 

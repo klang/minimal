@@ -11,6 +11,7 @@ https://gist.github.com/doobeh/5d0f965502b86fee80fe
 </div>
 
 
+
 class DeviceRoles(FlaskForm):
     role = StringField('role')
 
