@@ -1,0 +1,95 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block content %}
+{{util.flashed_messages(dismissible=True)}}
+<div class="page-header">
+  <table class="table">
+    <thead>
+      <th>name</th>
+      <th>networks</th>
+      <th>email_ips</th>
+      <th>sccm_ips</th>
+      <th>tp_subnets</th>
+      <th>vtp_domain</th>
+      <th>vtp_enc_key</th>
+    </thead>
+    {% for site in sites %}
+      <tr id="{{ site.name }}">
+        <td>{{ site.name }}</td>
+        <td>{{ site.networks }}</td>
+        <td>{{ site.email_ips }}</td>
+        <td>{{ site.sccm_ips }}</td>
+        <td>{{ site.tp_subnets }}</td>
+        <td>{{ site.vtp_domain }}</td>
+        <td>{{ site.vtp_enc_key }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div id="page"></div>
+
+<div class="container">
+  <div class="row">
+    <div class="control-group" id="fields">
+      <label class="control-label" for="field1">Site</label>
+      <div class="controls">
+        <form role="form" autocomplete="off">
+          <div class="entry input-group col-xs-3">
+            <input class="form-control" name="fields[]" type="text" placeholder="name" />
+            <input class="form-control" name="fields[]" type="integer" placeholder="users" />
+            <input class="form-control" name="fields[]" type="integer" placeholder="ipphones" />
+            <span class="input-group-btn">
+                            <button class="btn btn-success btn-add" type="button">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        </span>
+          </div>
+        </form>
+        <br>
+        <small>Press <span class="glyphicon glyphicon-plus gs"></span> to add another form field :)</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script language="JavaScript">
+    $(function()
+    {
+        $(document).on('click', '.btn-add', function(e)
+        {
+            e.preventDefault();
+
+            var controlForm = $('.controls form:first'),
+                currentEntry = $(this).parents('.entry:first'),
+                newEntry = $(currentEntry.clone()).appendTo(controlForm);
+
+            newEntry.find('input').val('');
+            controlForm.find('.entry:not(:last) .btn-add')
+                .removeClass('btn-add').addClass('btn-remove')
+                .removeClass('btn-success').addClass('btn-danger')
+                .html('<span class="glyphicon glyphicon-minus"></span>');
+        }).on('click', '.btn-remove', function(e)
+        {
+            $(this).parents('.entry:first').remove();
+
+            e.preventDefault();
+            return false;
+        });
+    });
+</script>
+{% endblock %}

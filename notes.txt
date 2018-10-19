@@ -1,0 +1,30 @@
+https://gist.github.com/doobeh/5d0f965502b86fee80fe
+
+<div class="container">
+  <h1>search site</h1>
+  {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
+  <form method="post" >
+    {{ form.csrf_token }}
+    {{ render_field(form.site) }}
+  <button type="submit" name="submit_button" class="btn btn-primary">Search</button>
+  </form>
+</div>
+
+
+class DeviceRoles(FlaskForm):
+    role = StringField('role')
+
+class DeviceLicenses(FlaskForm):
+    licence = StringField('license')
+
+class DeviceCategories(FlaskForm):
+    category = IntegerField('category')
+
+#{'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string'], 'licenses': ['string'], 'categories': [0]}
+class DeviceConfigurationForm(FlaskForm):
+    name = StringField('name')
+    model = StringField('model')
+    mbps = IntegerField('mbps')
+    roles = FieldList(FormField(DeviceRoles))
+    licenses = FieldList(FormField(DeviceLicenses))
+    categories = FieldList(FormField(DeviceCategories))

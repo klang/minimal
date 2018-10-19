@@ -1,8 +1,8 @@
 from flask import Flask, render_template, flash
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
-from flask_wtf import Form
-from wtforms import TextField, StringField, BooleanField, SubmitField, validators, SelectField
+from flask_wtf import FlaskForm
+from wtforms import TextField, StringField, BooleanField, SubmitField, validators, SelectField, HiddenField, FieldList, FormField
 from wtforms.validators import NumberRange
 from wtforms_components import IntegerField
 
@@ -10,16 +10,14 @@ import requests
 import json
 from retrying import retry
 
-# straight from the wtforms docs:
-class TelephoneForm(Form):
-    country_code = IntegerField('Country Code', [validators.required()])
-    area_code = IntegerField('Area Code/Exchange', [validators.required()])
-    number = StringField('Number')
+import wtforms_json
+from flask import request
+wtforms_json.init()
 
 
 # https://wtforms-components.readthedocs.io/en/latest/#selectfield
 
-class RouterConfigForm(Form):
+class RouterConfigForm(FlaskForm):
     router = SelectField('Router', description="router", choices=[('C4321', 'Cisco 4321')])
     switch = SelectField('Switch', description="switch", choices=[('3650X-12', '3650X-12P')])
     aps = SelectField('APs', choices=[(0,0), (1,1), (2,2), (3,3)], validators=[NumberRange(min=0, max=3)], coerce=int)
@@ -28,6 +26,38 @@ class RouterConfigForm(Form):
     region = SelectField('Region', choices=[('eu-west-1', 'Ireland'), ('eu-west-2', 'London'), ('eu-west-3', 'Paris'), ('eu-central-1', 'Frankfurt')])
     serial = TextField('Serial', description='Serial number for each device to be configured')
     submit_button = SubmitField('Submit Form')
+
+
+# there must be a way to auto generate this stuff
+class AddSiteForm(FlaskForm):
+    site_name = StringField('site_name', description="Name of new site - must exist in SNOW, to extract the site category etc" )
+    users = IntegerField('users', description="Number of expected users")
+    ipphones = IntegerField('ipphones', description="Number physical IP Phones")
+    submit_button = SubmitField('Submit Form')
+
+class AddDeviceConfigurationForm(FlaskForm):
+    name = StringField('name')
+    model = StringField('model')
+    mbps = IntegerField('mbps')
+    roles = StringField('roles')
+    licenses = StringField('licenses')
+    categories = StringField('categories')
+
+class putSiteForm(FlaskForm):
+    name = StringField('name')
+    networks = StringField('networks')
+    email_ips = StringField('email_ips')
+    sccm_ips = StringField('sccm_ips')
+    tp_subnets = StringField('tp_subnets')
+    vtp_domain = StringField('vtp_domain')
+    vtp_enc_key = StringField('vtp_enc_key')
+    #device_configurations = FieldList(FormField(DeviceConfigurationForm), min_entries=1)
+#    device_configurations = HiddenField('device_configurations')
+    #submit_button = SubmitField('Submit Form')
+
+class searchSiteForm(FlaskForm):
+    site = StringField('site')
+    submit_button = SubmitField('Find Site')
 
 
 def retry_if_HTTP404(exception):
@@ -44,6 +74,28 @@ def get_url(url):
         raise e
 
 
+def get_site(site):
+    data = []
+    url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}".format(site)
+    try:
+        r = get_url(url)
+        data = json.loads(r.text)
+    except requests.exceptions.HTTPError as e:
+        flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
+    return data
+
+
+def get_vlans(site):
+    data = []
+    url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}/vlans".format(site)
+    try:
+        r = get_url(url)
+        data = json.loads(r.text)
+    except requests.exceptions.HTTPError as e:
+        flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
+    return data
+
+
 def create_app(configfile=None):
     app = Flask(__name__)
     AppConfig(app, configfile)  # Flask-Appconfig is not necessary, but
@@ -53,6 +105,51 @@ def create_app(configfile=None):
     # in a real app, these should be configured through Flask-Appconfig
     app.config['SECRET_KEY'] = 'devkey'
 
+
+
+    @app.route('/scratch', methods=('GET', 'POST'))
+    def scratch():
+        #if requests.method == 'POST':
+        form = AddSiteForm()
+        form.validate_on_submit()
+        f2 = putSiteForm()
+        if form.is_submitted():
+            data = get_site(form.site_name.data)
+            print(data)
+            return render_template('scratch.html', form=form, form2=f2, sites=[data])
+        return render_template('scratch.html', form=form, form2=f2)
+
+
+    @app.route('/site', methods=('GET', 'POST'))
+    def site():
+        form = searchSiteForm()
+        form.validate_on_submit()
+        if form.is_submitted():
+            print(request.form)
+            submitted_device_configuration = None
+            if 'submit_button' not in request.form and 'add_device_config' in request.form:
+                print("add device configuration")
+                submitted_device_configuration = request.form.to_dict(flat=True)
+                submitted_device_configuration.pop('csrf_token', None)
+                print("SUBMITTED CONFIG", submitted_device_configuration)
+            data = get_site(form.site.data)
+            print("\nSITE ", data)
+            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            if submitted_device_configuration:
+                data['device_configurations'].append(submitted_device_configuration)
+            print("\nEXTRA DEVICE CONFIGURATIONS ", [d for d in data['device_configurations']])
+            vlans = get_vlans(form.site.data)
+            vlans.append({'vlan': 1, 'kind': 'string', 'description': 'string'})
+            vlans.append({'vlan': 2, 'kind': 'string', 'description': 'string'})
+            vlans.append({'vlan': 3, 'kind': 'string', 'description': 'string'})
+            print("\nEXTRA VLANS ", vlans)
+
+            return render_template('site-search.html', form=form, vlans=vlans, data=data)
+        return render_template('site-search.html', form=form)
+
+
     @app.route('/', methods=('GET', 'POST'))
     def index():
         form = RouterConfigForm()
@@ -60,7 +157,7 @@ def create_app(configfile=None):
         print("configuring%s+%s" % (form.router.data, form.switch.data) + " with SNOW ID: %s " % (form.snow.data) + " %s APs" % (form.aps.data))
 
         if form.is_submitted():
-            url="https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
+            url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
             r = requests.get(url)
             print(r.text)
             # a form that is able to show the information will need to be made
@@ -73,7 +170,7 @@ def create_app(configfile=None):
         url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
         try:
             r = get_url(url)
-            data= json.loads(r.text)
+            data = json.loads(r.text)
         except requests.exceptions.HTTPError as e:
             flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
             data = []
@@ -121,6 +218,9 @@ def create_app(configfile=None):
             flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
             data = []
         print(data)
+        data.append({'name': 'fake1', 'ip': '10.10.2.1', 'roles': 'fakeA'})
+        data.append({'name': 'fake2', 'ip': '10.10.2.2', 'roles': 'fakeB'})
+        data.append({'name': 'fake3', 'ip': '10.10.2.3', 'roles': 'fakeC'})
         return render_template('devices.html', devices=data)
 
     return app
@@ -128,3 +228,4 @@ def create_app(configfile=None):
 
 if __name__ == '__main__':
     create_app().run(debug=True)
+

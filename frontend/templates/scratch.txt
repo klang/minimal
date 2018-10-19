@@ -1,0 +1,96 @@
+<div id="accordion">
+  {% for site in sites %}
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{loop.index}}" aria-expanded="false" aria-controls="collapse{{loop.index}}">
+          {{ site.name }}
+        </button>
+      </h5>
+    </div>
+    <div id="collapse{{loop.index}}" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body">
+        {% for vlan in vlans[site.name] %}
+        <table class="table">
+          <thead>
+            <th>vlan</th>
+            <th>kind</th>
+            <th>description</th>
+          </thead>
+          <tr id="{{ vlan.vlan }}">
+            <td>{{ vlan.vlan }}</td>
+            <td>{{ vlan.kind }}</td>
+            <td>{{ vlan.description }}</td>
+          </tr>
+        </table>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+
+
+
+
+$.ajax({
+  dataType: "json",
+  url: 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/foo',
+  success: 200
+});
+
+$.ajax({
+  dataType: "json",
+  url: 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/foo',
+  dataType: 'json',
+  success: function (data)
+  {
+    return data.responseJSON
+  }
+});
+
+https://api.jquery.com/jquery.getjson/
+
+https://www.roelvanlisdonk.nl/2014/01/31/loading-html-fragments-with-jquery/
+
+
+function loadHtmlFragment (id, url)
+{
+    // Use jQuery "ajax" instead of jQuery "load", because "load" will get the whole div,
+    // when used with selector "#page" and not the contents.
+    // You can get only the contents with "load", by using "url #page > *",
+    // but that will only get the child elements of the div,
+    // stripping out any direct child text.
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: "html",
+        success: function (data)
+        {
+            // Strip out any javascript by using "parseHtml".
+            // Only use the contents of the html fragment by using "html()".
+            var dom = $("<div>").append($.parseHTML(data)).find(id).html();
+
+            // Adjust UI.
+            $(id).html(dom);
+        }
+    });
+};
+
+ loadHtmlFragment ('#page', 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/foo')
+
+
+# forms
+
+https://github.com/christabor/swagger_wtforms
+
+
+
+
+
+ # add new site
+ https://bootsnipp.com/snippets/featured/dynamic-form-fields-add-amp-remove-bs3
+https://bootsnipp.com/user/snippets/2emog
+
+
