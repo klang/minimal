@@ -54,7 +54,29 @@
     {% endfor %}
   </table>
 
-  <h1>Device Configurations</h1>
+  <h1>Actual Device Configurations</h1>
+  <table class="table">
+    <thead>
+    <th>name</th>
+    <th>ip</th>
+    <th>roles</th>
+    <th>dev_cfg</th>
+    <th>site</th>
+    <th>serial</th>
+    </thead>
+    {% for device in devices %}
+    <tr id="{{ devices.name }}">
+      <td>{{ device.name }}</td>
+      <td>{{ device.ip }}</td>
+      <td>{{ device.roles }}</td>
+      <td>{{ device.dev_cfg }}</td>
+      <td>{{ device.site }}</td>
+      <td>{{ device.serial }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h1>Possible Device Configurations</h1>
   <table class="table">
     <thead>
     <th>name</th>

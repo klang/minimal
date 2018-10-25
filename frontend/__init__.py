@@ -86,9 +86,9 @@ def get_url(url):
         raise e
 
 
-def get_site(site):
+def get_rest_command(url, command):
     data = []
-    url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}".format(site)
+    url = "{url}/{command}".format(url = url.strip("/"), command = command)
     try:
         r = get_url(url)
         data = json.loads(r.text)
@@ -96,16 +96,11 @@ def get_site(site):
         flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
     return data
 
+get_info = lambda command: get_rest_command("https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/", command)
 
-def get_vlans(site):
-    data = []
-    url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}/vlans".format(site)
-    try:
-        r = get_url(url)
-        data = json.loads(r.text)
-    except requests.exceptions.HTTPError as e:
-        flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
-    return data
+get_site = lambda site : get_info("sites/{}?list_viable_devices=true".format(site))
+get_vlans = lambda site : get_info("sites/{}/vlans".format(site))
+get_devices= lambda site : get_info("sites/{}/devices".format(site))
 
 
 def create_app(configfile=None):
@@ -164,8 +159,12 @@ def create_app(configfile=None):
             vlans.append({'vlan': 2, 'kind': 'string', 'description': 'string'})
             vlans.append({'vlan': 3, 'kind': 'string', 'description': 'string'})
             print("\nEXTRA VLANS ", vlans)
-
-            return render_template('site-search.html', form=form, vlans=vlans, data=data)
+            devices = get_devices(form.site.data)
+            print("\nEXTRA DEVICES ", devices)
+            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            return render_template('site-search.html', form=form, vlans=vlans, devices=devices, data=data)
         return render_template('site-search.html', form=form)
 
 
