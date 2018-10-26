@@ -9,6 +9,7 @@ from wtforms_components import IntegerField
 import requests
 import json
 from retrying import retry
+requests.packages.urllib3.disable_warnings()
 
 import wtforms_json
 from flask import request
@@ -68,7 +69,7 @@ def retry_if_HTTP404(exception):
 @retry(stop_max_attempt_number=5, wait_exponential_multiplier=100, retry_on_exception=retry_if_HTTP404)
 def get_url(url):
     try:
-        r = requests.get(url)
+        r = requests.get(url, verify=False)
         r.raise_for_status()
         return r
     except requests.exceptions.HTTPError as e:
@@ -159,7 +160,7 @@ def create_app(configfile=None):
                 # i.e. call the rest endpoint
                 print("CALL post_url with {}".format(submitted))
                 #CALL post_url with {'dev_cfg': 'string3', 'building': 'HB2', 'df': 'M01', 'serial': '15135424', 'stack_partner': '123', 'wan_line': 'adsga', 'site': 'DKAARHED42', 'auto_connect': 'false'}
-                r = requests.post('https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/devices', data=submitted)
+                r = requests.post('https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/devices', data=submitted, verify=False)
                 print('post_url responds with: ')
                 print(r.text)
                 flash(r.text, 'info')
@@ -172,15 +173,15 @@ def create_app(configfile=None):
             devices = get_devices(form.site_name.data)
 
             # TODO: remove added fake data
-            data['device_configurations'].append({'name': 'string1', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            data['device_configurations'].append({'name': 'string2', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            data['device_configurations'].append({'name': 'string3', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            vlans.append({'vlan': 1, 'kind': 'stringA', 'description': 'string'})
-            vlans.append({'vlan': 2, 'kind': 'stringB', 'description': 'string'})
-            vlans.append({'vlan': 3, 'kind': 'stringC', 'description': 'string'})
-            devices.append({'name': 'string4', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
-            devices.append({'name': 'string5', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
-            devices.append({'name': 'string6', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            #data['device_configurations'].append({'name': 'string1', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            #data['device_configurations'].append({'name': 'string2', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            #data['device_configurations'].append({'name': 'string3', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            #vlans.append({'vlan': 1, 'kind': 'stringA', 'description': 'string'})
+            #vlans.append({'vlan': 2, 'kind': 'stringB', 'description': 'string'})
+            #vlans.append({'vlan': 3, 'kind': 'stringC', 'description': 'string'})
+            #devices.append({'name': 'string4', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            #devices.append({'name': 'string5', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            #devices.append({'name': 'string6', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
             # ----------- fake data ends here
 
             add_device = AddDevice(request.values)
