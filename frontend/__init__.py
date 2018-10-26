@@ -1,9 +1,9 @@
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, redirect
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from flask_wtf import FlaskForm
 from wtforms import TextField, StringField, BooleanField, SubmitField, validators, SelectField, HiddenField, FieldList, FormField
-from wtforms.validators import NumberRange
+from wtforms.validators import NumberRange, DataRequired
 from wtforms_components import IntegerField
 
 import requests
@@ -36,17 +36,6 @@ class AddSiteForm(FlaskForm):
     submit_button = SubmitField('Submit Form')
 
 
-class Device(FlaskForm):
-    site_name = StringField('site_name', description="site name")
-    dev_cfg = StringField('dev_cfg', description="viable device configuration")
-    building = StringField('building', description="3 letter building name")
-    df = StringField('df', description="3 letter distribution frame - I01 for IDF01, M01 for MDF01")
-    serial = StringField('serial', description="Chassis serial number")
-    stack_partner = StringField('stack_partner', description="use the assigned host as the primary device in a stack, this host should join")
-    auto_connect = BooleanField('auto_connect', description="When true, connections to preexisting site devices will be automatically generated")
-    wan_line = StringField('wan_line', description="for dmvpn/mpls roles, a SNOW wan name to retrieve wan details")
-    submit_button = SubmitField('Submit Form')
-
 class AddDeviceConfigurationForm(FlaskForm):
     name = StringField('name')
     model = StringField('model')
@@ -68,8 +57,8 @@ class putSiteForm(FlaskForm):
     #submit_button = SubmitField('Submit Form')
 
 class searchSiteForm(FlaskForm):
-    site = StringField('site')
-    submit_button = SubmitField('Find Site')
+    site_name = StringField('site_name')
+    submit_search_site = SubmitField('Find Site')
 
 
 def retry_if_HTTP404(exception):
@@ -97,11 +86,28 @@ def get_rest_command(url, command):
     return data
 
 get_info = lambda command: get_rest_command("https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/", command)
-
 get_site = lambda site : get_info("sites/{}?list_viable_devices=true".format(site))
 get_vlans = lambda site : get_info("sites/{}/vlans".format(site))
-get_devices= lambda site : get_info("sites/{}/devices".format(site))
+get_devices = lambda site : get_info("sites/{}/devices".format(site))
 
+#post_devices = lambda site : get_info("devices".format(site))
+
+class Device(FlaskForm):
+    site_name = StringField('site_name', description="site name")
+    dev_cfg = StringField('dev_cfg', description="viable device configuration")
+    building = StringField('building', description="3 letter building name")
+    df = StringField('df', description="3 letter distribution frame - I01 for IDF01, M01 for MDF01")
+    serial = StringField('serial', description="Chassis serial number")
+    stack_partner = StringField('stack_partner', description="use the assigned host as the primary device in a stack, this host should join")
+    auto_connect = BooleanField('auto_connect', description="When true, connections to preexisting site devices will be automatically generated")
+    wan_line = StringField('wan_line', description="for dmvpn/mpls roles, a SNOW wan name to retrieve wan details")
+    submit_device = SubmitField('Add Device')
+
+
+class AddDevice(FlaskForm):
+    site_name = HiddenField('site_name')
+    dev_cfg = SelectField('dev_cfg', validators=[DataRequired()], id='dev_cfg', description="DeviceConfigurations")
+    submit_add_device = SubmitField('Add Device')
 
 def create_app(configfile=None):
     app = Flask(__name__)
@@ -113,19 +119,6 @@ def create_app(configfile=None):
     app.config['SECRET_KEY'] = 'devkey'
 
 
-
-    @app.route('/scratch', methods=('GET', 'POST'))
-    def scratch():
-        #if requests.method == 'POST':
-        form = AddSiteForm()
-        form.validate_on_submit()
-        f2 = putSiteForm()
-        if form.is_submitted():
-            data = get_site(form.site_name.data)
-            print(data)
-            return render_template('scratch.html', form=form, form2=f2, sites=[data])
-        return render_template('scratch.html', form=form, form2=f2)
-
     @app.route('/device', methods=('GET', 'POST'))
     def device():
         form = Device()
@@ -134,37 +127,67 @@ def create_app(configfile=None):
             return render_template('device.html', form=form)
         return render_template('device.html', form=form)
 
+
     @app.route('/site', methods=('GET', 'POST'))
     def site():
-        form = searchSiteForm()
+        form = searchSiteForm(request.values)
         form.validate_on_submit()
+
+        print(request.method)
+        print(request.form)
+
         if form.is_submitted():
-            print(request.form)
-            submitted_device_configuration = None
-            if 'submit_button' not in request.form and 'add_device_config' in request.form:
-                print("add device configuration")
-                submitted_device_configuration = request.form.to_dict(flat=True)
-                submitted_device_configuration.pop('csrf_token', None)
-                print("SUBMITTED CONFIG", submitted_device_configuration)
-            data = get_site(form.site.data)
-            print("\nSITE ", data)
-            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            data['device_configurations'].append({'name': 'string', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
-            if submitted_device_configuration:
-                data['device_configurations'].append(submitted_device_configuration)
-            print("\nEXTRA DEVICE CONFIGURATIONS ", [d for d in data['device_configurations']])
-            vlans = get_vlans(form.site.data)
-            vlans.append({'vlan': 1, 'kind': 'string', 'description': 'string'})
-            vlans.append({'vlan': 2, 'kind': 'string', 'description': 'string'})
-            vlans.append({'vlan': 3, 'kind': 'string', 'description': 'string'})
-            print("\nEXTRA VLANS ", vlans)
-            devices = get_devices(form.site.data)
-            print("\nEXTRA DEVICES ", devices)
-            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
-            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
-            devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
-            return render_template('site-search.html', form=form, vlans=vlans, devices=devices, data=data)
+            if 'submit_add_device' in request.form:
+                print("Got a submit event on the AddDevice form")
+                submitted = request.form.to_dict(flat=True)
+                submitted.pop('csrf_token', None)
+                print("SUBMITTED DEVICE", submitted)
+                add_device = Device(site_name = submitted['site_name'], dev_cfg = submitted['dev_cfg'])
+                add_device.site_name.render_kw = {'readonly': True}
+                add_device.dev_cfg.render_kw = {'readonly': True}
+                add_device.dev_cfg.description = '' # just to remove the description
+                return render_template('device.html', form=add_device)
+
+            if 'submit_device' in request.form:
+                print("Got a submit event on the Device form")
+                submitted = request.form.to_dict(flat=True)
+                submitted.pop('csrf_token', None)
+                submitted['site'] = submitted.pop('site_name')
+                submitted['auto_connect'] = submitted.get('auto_connect', 'false').replace('y', 'true')
+                submitted.pop('submit_device', None)
+                # TODO: actually insert 'submitted' into a database somewhere
+                # i.e. call the rest endpoint
+                print("CALL post_url with {}".format(submitted))
+                #CALL post_url with {'dev_cfg': 'string3', 'building': 'HB2', 'df': 'M01', 'serial': '15135424', 'stack_partner': '123', 'wan_line': 'adsga', 'site': 'DKAARHED42', 'auto_connect': 'false'}
+                r = requests.post('https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/devices', data=submitted)
+                print('post_url responds with: ')
+                print(r.text)
+                flash(r.text, 'info')
+                flash('{} was added added to {} - {}-{}'.format(submitted['dev_cfg'], submitted['site'], submitted['building'], submitted['df']), 'success')
+
+            # DATA FOR THE "SHOW SITE INFORMATION" Page
+            #
+            data = get_site(form.site_name.data)
+            vlans = get_vlans(form.site_name.data)
+            devices = get_devices(form.site_name.data)
+
+            # TODO: remove added fake data
+            data['device_configurations'].append({'name': 'string1', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            data['device_configurations'].append({'name': 'string2', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            data['device_configurations'].append({'name': 'string3', 'model': 'string', 'mbps': 0, 'roles': ['string1', 'string2', 'string3'], 'licenses': ['string1', 'string2', 'string3'], 'categories': [0,1,2,3]})
+            vlans.append({'vlan': 1, 'kind': 'stringA', 'description': 'string'})
+            vlans.append({'vlan': 2, 'kind': 'stringB', 'description': 'string'})
+            vlans.append({'vlan': 3, 'kind': 'stringC', 'description': 'string'})
+            devices.append({'name': 'string4', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            devices.append({'name': 'string5', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            devices.append({'name': 'string6', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
+            # ----------- fake data ends here
+
+            add_device = AddDevice(request.values)
+            choices = [(device['name'], device['name']) for device in data['device_configurations']]
+            add_device.dev_cfg.choices = choices
+
+            return render_template('site-search.html', form=form, vlans=vlans, devices=devices, data=data, add_device=add_device)
         return render_template('site-search.html', form=form)
 
 
@@ -195,52 +218,7 @@ def create_app(configfile=None):
         print(data)
         return render_template('sites.html', sites=data)
 
-    @app.route('/advanced-sites', methods=('GET', 'POST'))
-    def advanced_sites():
-        url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites"
-        try:
-            r = get_url(url)
-            data = json.loads(r.text)
-        except requests.exceptions.HTTPError as e:
-            flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
-            data = []
-        print(data)
-        if len(data) == 1:
-            print("WARNING: adding a bit of fake data for site")
-            data.append({'name': 'sample 1', 'networks': 'string', 'email_ips': 'string', 'sccm_ips': 'string', 'tp_subnets': 'string', 'vtp_domain': 'string', 'vtp_enc_key': 'string'})
-            data.append({'name': 'sample 2', 'networks': 'string', 'email_ips': 'string', 'sccm_ips': 'string', 'tp_subnets': 'string', 'vtp_domain': 'string', 'vtp_enc_key': 'string'})
-        vlans = {}
-        for site in data:
-            url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites/{}/vlans".format(site['name'])
-            try:
-                r = get_url(url)
-                subdata = json.loads(r.text)
-                if len(subdata) == 1:
-                    print("WARNING: adding a bit of fake data for vlans at site")
-                    subdata.append({'vlan': 1, 'kind': 'string', 'description': 'string'})
-                    subdata.append({'vlan': 2, 'kind': 'string', 'description': 'string'})
-                    subdata.append({'vlan': 3, 'kind': 'string', 'description': 'string'})
-            except requests.exceptions.HTTPError as e:
-                subdata = []
-            vlans[site['name']] = subdata
 
-        return render_template('advanced-sites.html', sites=data, vlans=vlans)
-
-    @app.route('/devices', methods=('GET', 'POST'))
-    def devices():
-        url = "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/devices"
-        try:
-            r = get_url(url)
-            data = json.loads(r.text)
-        except requests.exceptions.HTTPError as e:
-            flash('{} - {} - has disappeared '.format(e.response.status_code, url), 'error')
-            data = []
-        print(data)
-
-        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
-        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
-        data.append({"name": "string", "ip": "string", "roles": "string", "dev_cfg": "string", "site": "string"})
-        return render_template('devices.html', devices=data)
 
     return app
 

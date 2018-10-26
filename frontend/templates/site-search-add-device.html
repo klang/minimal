@@ -8,16 +8,11 @@
 {{util.flashed_messages(dismissible=True)}}
 <div class="container">
   <h1>search site</h1>
-  {{ wtf.quick_form(form, button_map={'submit_search_site': 'primary'}) }}
+  {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
 
 </div>
 {% if data %}
 
-<div class="container">
-  <h1>add device to site</h1>
-  {{ wtf.quick_form(add_device, button_map={'submit_add_device': 'primary'}) }}
-
-</div>
 
 <div class="container">
   <h1>Site</h1>
@@ -79,6 +74,44 @@
       <td>{{ device.serial }}</td>
     </tr>
     {% endfor %}
+  </table>
+
+
+  <h1>Possible Device Configurations</h1>
+  <table class="table">
+    <thead>
+    <th>name</th>
+    <th>model</th>
+    <th>mbps</th>
+    <th>roles</th>
+    <th>categories</th>
+    <th>licenses</th>
+    </thead>
+    {% for config in data.device_configurations %}
+    <tr>
+      <td>{{ config.name }}</td>
+      <td>{{ config.model }}</td>
+      <td>{{ config.mbps }}</td>
+      <td>{{ config.roles }}</td>
+      <td>{{ config.categories }}</td>
+      <td>{{ config.licenses }}</td>
+    </tr>
+    {% endfor %}
+    <form autocomplete="off" method="post" >
+      {{ form.csrf_token }}
+      <div class="entry input-group col-xs-3">
+      <tr>
+        <td><input class="input-mini" name="name" type="text" placeholder="name" /></td>
+        <td><input class="input-mini" name="model" type="integer" placeholder="model" /></td>
+        <td><input class="input-mini" name="mbps" type="integer" placeholder="mbps" /></td>
+        <td><input class="input-mini" name="roles" type="text" placeholder="roles" /></td>
+        <td><input class="input-mini" name="categories" type="integer" placeholder="categories" /></td>
+        <td><input class="input-mini" name="licenses" type="text" placeholder="licenses" /><button type="submit" name="add_device_config" class="btn btn-primary">Add</button>
+        </td>
+      </tr>
+      </div>
+    </form>
+    </tbody>
   </table>
 
 </div>
