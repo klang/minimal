@@ -108,4 +108,10 @@ An example frontend is represented in `baseline-flask` and can be started with
 
     pyenv activate baseline-flask
     flask --app=frontend dev -p 5000
-        
+    # flask complains when --configfile is used, unless we make a softlink to the configfile
+    ln -s ../frontend.default_settings frontend/frontend.default_settings
+    ln -s ../frontend.swagger_settings frontend/frontend.swagger_settings
+    ln -s ../frontend.develop_settings frontend/frontend.develop_settings
+    flask --app=frontend --configfile=frontend.default_settings  dev -p 5000
+
+The `frontend.develop_settings` file is NOT part of the repository right now. 

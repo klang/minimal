@@ -1,0 +1,3 @@
+DEBUG = True
+SECRET_KEY = 'devkey'
+API_ENDPOINT = 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/'
