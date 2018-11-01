@@ -101,16 +101,16 @@ class Device(FlaskForm):
                             description="site name",
                             validators=[validators.Regexp('^[A-Z0-9]{5,7}([-]?[A-Za-z0-9]{3,5}|)$', flags=0, message='site_name not allowed')])
     dev_cfg = StringField('dev_cfg', description="viable device configuration")
-    building = StringField('building',
-                           description="3 letter building name",
-                           validators=[validators.Regexp('[A-Z0-9]{3}', flags=0, message='3 letter building name')])
+    #building = StringField('building',
+    #                       description="3 letter building name",
+    #                       validators=[validators.Regexp('[A-Z0-9]{3}', flags=0, message='3 letter building name')])
     df = StringField('df',
                      description="3 letter distribution frame - I01 for IDF01, M01 for MDF01",
                      validators=[validators.Regexp('[MIL][0-9]{2}', flags=0, message='3 letter distribution frame - I01 for IDF01, M01 for MDF01')])
     serial = StringField('serial', description="Chassis serial number")
-    stack_partner = StringField('stack_partner', description="use the assigned host as the primary device in a stack, this host should join")
-    auto_connect = BooleanField('auto_connect', description="When true, connections to preexisting site devices will be automatically generated")
-    wan_line = StringField('wan_line', description="for dmvpn/mpls roles, a SNOW wan name to retrieve wan details")
+    #stack_partner = StringField('stack_partner', description="use the assigned host as the primary device in a stack, this host should join")
+    #auto_connect = BooleanField('auto_connect', description="When true, connections to preexisting site devices will be automatically generated")
+    #wan_line = StringField('wan_line', description="for dmvpn/mpls roles, a SNOW wan name to retrieve wan details")
     submit_device = SubmitField('Add Device')
 
 
@@ -199,7 +199,7 @@ def create_app(configfile=None):
                 #    add_device = AddDevice(request.values)
                 #    return render_template('device.html', form=add_device)
                 submitted['site'] = submitted.pop('site_name')
-                flash('{} was added added to {} - {}-{}'.format(submitted['dev_cfg'], submitted['site'], submitted['building'], submitted['df']), 'success')
+                flash('{} was added added to {} - {}'.format(submitted['dev_cfg'], submitted['site'], submitted['df']), 'success')
 
 
             if ('submit_search_site' in request.form and bool(form.site_name.data)) or 'submit_device' in request.form:
