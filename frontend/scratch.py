@@ -60,7 +60,7 @@ def devices():
         return render_template('advanced-sites.html', sites=data, vlans=vlans)
 
 
-        @app.route('/site', methods=('GET', 'POST'))
+    @app.route('/site', methods=('GET', 'POST'))
     def site():
         form = searchSiteForm()
         form.validate_on_submit()
@@ -102,3 +102,28 @@ def devices():
             devices.append({'name': 'string', 'ip': 'string', 'roles': 'string', 'dev_cfg': 'string', 'site': 'string', 'serial': 'string'})
             return render_template('site-search.html', form=form, vlans=vlans, devices=devices, data=data, add_device=add_device)
         return render_template('site-search.html', form=form)
+
+
+
+
+import json, requests
+
+requests.packages.urllib3.disable_warnings()
+url2 = 'https://dev-netsoa.vestas.net/netmanager/1.0.0/sites'
+post = {'site_name': 'DKCLP5', 'users': '1', 'ipphones': '1'}
+r = requests.post(url2, data=post, verify=False)
+r
+# <Response [405]>
+r.text
+# '{"message": "The method is not allowed for the requested URL."}\n'
+
+url = 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites'
+r = requests.post(url, data=post, verify=False)
+r
+# <Response [200]>
+r.text
+# '{\n  "name" : "DKAARHED42",\n  "networks" : "string",\n  "email_ips" : "string",\n  "sccm_ips" : "string",\n  "tp_subnets" : "string",\n  "vtp_domain" : "string",\n  "vtp_enc_key" : "string",\n  "device_configurations" : [ {\n    "name" : "string",\n    "model" : "string",\n    "mbps" : 0,\n    "roles" : [ "string" ],\n    "licenses" : [ "string" ],\n    "categories" : [ 0 ]\n  } ]\n}'
+
+curl -X POST "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/sites" -H "accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -d "site_name=asdf&users=1&ipphones=1"
+
+curl -X POST "https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/site" -H "accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -d "site_name=DKCLP5&users=1&ipphones=1"

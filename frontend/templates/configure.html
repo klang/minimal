@@ -5,13 +5,10 @@
 
 {% block content %}
 {{util.flashed_messages(dismissible=True)}}
-<ul>
-    <li><a href="/snow">Add site in SNOW</a></li>
-    <li><a href="/site">Add site</a></li>
-    <li><a href="/sites">List sites</a></li>
-    <li><a href="/configure">Basic Configuration</a></li>
-    <li><a href="/device">Add device</a></li>
-</ul>
+<div class="container">
+  <h1>Basic Configuration</h1>
+  {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
+</div>
 {% endblock %}
 
 {% block head %}

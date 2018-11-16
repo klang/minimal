@@ -15,6 +15,8 @@ from .device import AddDeviceConfigurationForm, DeviceForm, AddDeviceForm
 from .helpers.rest import get_url, get_rest_command
 from .site import SearchSiteForm, AddSiteForm
 from .router import RouterConfigForm
+from .navigation import nav
+
 
 wtforms_json.init()
 requests.packages.urllib3.disable_warnings()
@@ -29,6 +31,7 @@ def create_app(configfile=None):
                                 # highly recommend =)
                                 # https://github.com/mbr/flask-appconfig
     Bootstrap(app)
+
 
     if not app.config.get('API_ENDPOINT'):
         app.config['API_ENDPOINT'] = 'https://virtserver.swaggerhub.com/steffenschumacher/netmanager/1.0.0/'
@@ -167,6 +170,11 @@ def create_app(configfile=None):
 
     @app.route('/', methods=('GET', 'POST'))
     def index():
+        return render_template('index.html')
+
+
+    @app.route('/configure', methods=('GET', 'POST'))
+    def configure():
         form = RouterConfigForm()
         form.validate_on_submit()  # to get error messages to the browser
         print("configuring%s+%s" % (form.router.data, form.switch.data) + " with SNOW ID: %s " % (form.snow.data) + " %s APs" % (form.aps.data))
@@ -178,7 +186,7 @@ def create_app(configfile=None):
             # a form that is able to show the information will need to be made
             return render_template('configuring.html', form=form)
 
-        return render_template('index.html', form=form)
+        return render_template('configure.html', form=form)
 
     @app.route('/sites', methods=('GET', 'POST'))
     def sites():
