@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Operations{% endblock %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Operations</h1>
+    </div>
+
+
+    <div class="container">
+        <div class="row">
+{% for queue in queues %}
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>{{ queue.name }}</h5>
+                        <canvas id="{{ queue.chart_name }}"></canvas>
+                    </div>
+                </div>
+            </div>
+{% endfor %}
+        </div>
+    </div>
+
+
+{% endblock %}
+
+<!-- https://medium.com/wdstack/bootstrap-4-chart-js-39006427f08f -->
+
+{% block extrascripts %}
+<!-- Graphs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js" integrity="sha256-MZo5XY1Ah7Z2Aui4/alkfeiq3CopMdV/bbkc/Sh41+s=" crossorigin="anonymous"></script>
+
+<!-- Queues -->
+<script>
+var colors = ['#007bff','#27ab49','#333333','#c3e6cb','#dc3545','#6c757d','#9fb798', '#d3ded0', '#ded0d0', '#b79898'];
+
+// See: http://jsfiddle.net/nkzyx50o/
+
+{% for queue in queues %}
+var {{ queue.chart_name }} = document.getElementById("{{ queue.chart_name }}");
+var {{ queue.chart_name }}Data = {
+    labels: ["S", "M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T"],
+    datasets: [
+        {
+            data: [639, 465, 493, 478, 589, 632, 674, 639, 465, 493, 478, 589],
+            backgroundColor: colors[7],
+            borderColor: colors[6],
+            borderWidth: 4,
+            pointBackgroundColor: colors[6]
+        }
+    ]
+};
+if ({{ queue.chart_name }}) {
+    new Chart({{ queue.chart_name }}, {
+        type: 'line',
+        data: {{ queue.chart_name }}Data,
+        options: {
+            elements: {
+                point: {
+                    radius: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    display: false, //this will remove all the x-axis grid lines
+                }],
+                yAxes: [{
+                    display: false, //this will remove all the x-axis grid lines
+                }]
+            },
+            legend: {
+                display: false
+            },
+            responsive: true
+        }
+    });
+}
+{% endfor %}
+</script>
+{% endblock %}

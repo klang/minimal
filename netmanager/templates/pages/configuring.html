@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>Basic Reconfiguration</h1>
+    {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
+  <h1>Configuration done</h1>
+  {{ form.router.data }}+{{ form.switch.data}} with SNOW ID: {{ form.snow.id.data }} and {{ form.aps.data }} APs
+</div>
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

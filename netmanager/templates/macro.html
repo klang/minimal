@@ -1,0 +1,53 @@
+{% macro render_pagination(pagination) %}
+<nav aria-label="Page Navigation">
+    <ul class="pagination">
+    {%- for page in pagination.iter_pages() %}
+        {% if page %}
+            {% if page != pagination.page %}
+                <li class="page-item"><a class="page-link" href="{{ url_for_other_page(page) }}">{{ page }}</a></li>
+            {% else %}
+                <li class="page-item active">
+                    <a class="page-link" href="{{ url_for_other_page(page) }}">{{ page }} <span class="sr-only">(current)</span></a>
+                </li>
+            {% endif %}
+        {% else %}
+            <li class="page-item disabled"><span class=ellipsis>…</span></li>
+        {% endif %}
+    {%- endfor %}
+    {% if pagination.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for_other_page(pagination.page + 1) }}#">Next</a></li>
+    {% endif %}
+    </ul>
+</nav>
+{% endmacro %}
+
+
+{% macro flashed_messages(messages=None, transform={
+  'critical': { 'type': 'danger',  'icon': 'fa-exclamation-circle'   },
+  'error':    { 'type': 'danger',  'icon': 'fa-exclamation-circle'   },
+  'info':     { 'type': 'info',    'icon': 'fa-info-circle'          },
+  'warning':  { 'type': 'warning', 'icon': 'fa-exclamation-triangle' },
+  'debug':    { 'type': 'info',    'icon': 'fa-info-circle'          },
+  'notset':   { 'type': 'succes',  'icon': 'fa-check-circle'         },
+  'message':  { 'type': 'succes',  'icon': 'fa-check-circle'         },
+}, default_category='info') -%}
+    {% with messages = messages or get_flashed_messages(with_categories=True) -%}
+        {% if messages -%} {# don't output anything if there are no messages #}
+        {% for cat, msg in messages %}
+    <script>
+        $.notify({
+            icon: 'fas {{transform.get(cat.lower(), default_category or cat).get('icon')}} mr-1',
+            message: '{{ msg }}',
+        },{
+            type: '{{transform.get(cat.lower(), default_category or cat).get('type')}}',
+        });
+    </script>
+        {%- endfor -%}
+        {% endif -%}
+    {% endwith -%}
+{% endmacro -%}
+
+
+{% macro icon(type=None, extra_classes=[]) -%}
+    <span{{ ({'class': (['glyphicon', 'glyphicon-' + type] + extra_classes)|join(' ')})|xmlattr}}{{kwargs|xmlattr}}></span>
+{%- endmacro %}

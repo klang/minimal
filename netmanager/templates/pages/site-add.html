@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+  <h1>Create new site</h1>
+  {{ wtf.quick_form(form, button_map={'submit_add_site': 'primary'}) }}
+</div>
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

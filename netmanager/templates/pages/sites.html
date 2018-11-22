@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <table class="table">
+    <thead>
+      <th>name</th>
+      <th>networks</th>
+      <th>email_ips</th>
+      <th>sccm_ips</th>
+      <th>tp_subnets</th>
+      <th>vtp_domain</th>
+      <th>vtp_enc_key</th>
+      <th>device_configurations</th>
+    </thead>
+    {% for site in sites %}
+      <tr id="{{ site.name }}">
+        <td>{{ site.name }}</td>
+        <td>{{ site.networks }}</td>
+        <td>{{ site.email_ips }}</td>
+        <td>{{ site.sccm_ips }}</td>
+        <td>{{ site.tp_subnets }}</td>
+        <td>{{ site.vtp_domain }}</td>
+        <td>{{ site.vtp_enc_key }}</td>
+        <td>
+          {% for config in site.device_configurations %}
+          <p>name {{ config.name }}</p>
+          <p>model {{ config.model }}</p>
+          <p>mbps {{ config.mbps }}</p>
+          <p>roles {{ config.roles }}</p>
+          <p>categories {{ config.categories }}</p>
+          <p>licenses {{ config.licenses }}</p>
+          {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

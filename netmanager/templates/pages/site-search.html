@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>search site</h1>
+  {{ wtf.quick_form(form, button_map={'submit_search_site': 'primary'}) }}
+
+</div>
+{% if data %}
+
+<div class="container">
+  <h1>add device to site</h1>
+  {{ wtf.quick_form(add_device, button_map={'submit_add_device': 'primary'}) }}
+
+</div>
+
+<div class="container">
+  <h1>Site</h1>
+  <table class="table">
+    <thead>
+    <th>name</th>
+    <th>networks</th>
+    <th>email_ips</th>
+    <th>sccm_ips</th>
+    <th>tp_subnets</th>
+    <th>vtp_domain</th>
+    <th>vtp_enc_key</th>
+    </thead>
+    <tr id="{{ data.name }}">
+      <td>{{ data.name }}</td>
+      <td>{{ data.networks }}</td>
+      <td>{{ data.email_ips }}</td>
+      <td>{{ data.sccm_ips }}</td>
+      <td>{{ data.tp_subnets }}</td>
+      <td>{{ data.vtp_domain }}</td>
+      <td>{{ data.vtp_enc_key }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h1>VLANs</h1>
+  <table class="table">
+    <thead>
+    <th>vlan</th>
+    <th>kind</th>
+    <th>description</th>
+    </thead>
+    {% for vlan in vlans %}
+    <tr id="{{ vlan.vlan }}">
+      <td>{{ vlan.vlan }}</td>
+      <td>{{ vlan.kind }}</td>
+      <td>{{ vlan.description }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h1>Actual Device Configurations</h1>
+  <table class="table">
+    <thead>
+    <th>name</th>
+    <th>ip</th>
+    <th>roles</th>
+    <th>dev_cfg</th>
+    <th>site</th>
+    <th>serial</th>
+    </thead>
+    {% for device in devices %}
+    <tr id="{{ devices.name }}">
+      <td>{{ device.name }}</td>
+      <td>{{ device.ip }}</td>
+      <td>{{ device.roles }}</td>
+      <td>{{ device.dev_cfg }}</td>
+      <td>{{ device.site }}</td>
+      <td>{{ device.serial }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</div>
+
+
+
+
+{% endif %}
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

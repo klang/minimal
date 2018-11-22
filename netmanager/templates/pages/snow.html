@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}SNOW{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="h2">Create new site in SNOW</h2>
+  {{ wtf.quick_form(form, button_map={'submit_snow': 'primary'}) }}
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+{% endblock %}

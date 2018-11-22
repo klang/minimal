@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% from "macro.html" import render_pagination %}
+
+{% block title %}Activity{% endblock %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Activity</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group btn-group-toggle mr-2" role="group">
+                <a href="{{ url_for_with_args('pages_app.elements', lifecycle="received") }}"
+                   class="btn btn-sm btn-outline-secondary {{ "active" if request.args.get('lifecycle', 'received') == "received" }}"> Received</a>
+                <a href="{{ url_for_with_args('pages_app.elements', lifecycle="embargo") }}"
+                   class="btn btn-sm btn-outline-secondary {{ "active" if request.args.get('lifecycle') == "embargo" }}"> Embargoed</a>
+                <a href="{{ url_for_with_args('pages_app.elements', lifecycle="launch") }}"
+                   class="btn btn-sm btn-outline-secondary {{ "active" if request.args.get('lifecycle') == "launch" }}"> Launched</a>
+            </div>
+
+            <div class="dropdown">
+                <a class="btn btn-sm btn-outline-secondary dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span data-feather="calendar"></span> {{ current_date_interval }}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    {% for date_interval in date_intervals %}
+                    <a class="dropdown-item small" href="{{ url_for_with_args('pages_app.elements', dateinterval=date_interval.value) }}">{{ date_interval.description }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+        <tr>
+            <th scope="col">Virtual id</th>
+            <th scope="col">Revision</th>
+            <th scope="col">Maturity</th>
+            {% if request.args.get('lifecycle') == "embargo" -%}
+            <th scope="col">Embargo Date</th>
+            {% elif request.args.get('lifecycle') == "launch" -%}
+            <th scope="col">Launch Date</th>
+            {% else -%}
+            <th scope="col">Received Date</th>
+            {% endif -%}
+            <th scope="col">Fully Received</th>
+        </tr>
+        </thead>
+        <tbody>
+{% for row in rows %}
+        <tr>
+            <td><a href="{{ url_for("pages_app.element", element_uuid=row.element_uuid) }}">{{ row.objectid }}</a></td>
+            <td>{{ row.revision }}</td>
+            <td>{{ row.maturity }}</td>
+            <td>{{ row.date }}</td>
+            <td>{{ "Yes" if row.uploaded else "No"  }}</td>
+        </tr>
+{% endfor %}
+        </tbody>
+    </table>
+    {{ render_pagination(pagination) }}
+
+{% endblock %}

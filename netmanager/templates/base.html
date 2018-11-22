@@ -1,0 +1,154 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../../../../favicon.ico">
+
+  <title>{% block title %}Remember to set the title{% endblock %}</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+
+  <!-- Font Awsome CSS -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+  <!-- Custom styles for this template -->
+  <link href="{{ url_for('static', filename='dashboard.css') }}" rel="stylesheet">
+
+  <!-- Typeahead CSS -->
+  <link href="{{ url_for('static', filename='typeaheadjs.css') }}" rel="stylesheet">
+
+  <!-- Animate CSS -->
+  <link href="{{ url_for('static', filename='animate.css') }}" rel="stylesheet">
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+  <script src="{{ url_for('static', filename='html5shiv.min.js') }}"></script>
+  <![endif]-->
+  {% block extrahead %}{% endblock %}
+
+  <style>
+span.twitter-typeahead .tt-input {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .1);
+}
+  </style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Netmanager</a>
+  <!--https://dev-netsoa.vestas.net/netmanager/1.0.0/sites/DKCLP?list_viable_devices=true
+    https://github.com/twitter/typeahead.js/issues/378
+    https://github.com/twitter/typeahead.js/issues/411
+  -->
+  <!-- <form action="{{ url_for('pages_app.boxsearch') }}" method="post"> -->
+  <!-- <div id="boxsearch"> -->
+      <input class="form-control form-control-dark w-100 twitter-typeahead" type="text" placeholder="Search" aria-label="Search">
+  <!-- </div> -->
+  <!-- </form> -->
+  <ul class="navbar-nav px-3">
+    <li class="nav-item text-nowrap">
+      <a class="nav-link" href="#">Sign out</a>
+    </li>
+  </ul>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    {% block leftnavigation %}
+    {{nav.left.render("bootstrap_dashboard_renderer")}}
+    {% endblock %}
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+  </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script
+        src="http://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="{{ url_for('static', filename='jquery-slim.min.js') }}"><\/script>')</script>
+<script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+
+<!-- Typeahead JS -->
+<script src="{{ url_for('static', filename='typeahead.bundle.js') }}"></script>
+
+<!-- Bootstrap Notify JS -->
+<script src="{{ url_for('static', filename='bootstrap-notify.js') }}"></script>
+<script>
+    $.notifyDefaults({
+        placement: {
+            from: "bottom",
+            align: "right"
+        },
+        delay: 0,
+    });
+</script>
+
+<!-- Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
+    feather.replace()
+</script>
+
+<script>
+    // Bloodhound with Remote + Prefetch
+    var object_suggestions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('objectid'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: 'http://localhost:5000/search/%QUERY',
+            wildcard: '%QUERY'                    // %QUERY will be replace by users input in
+        },                                        // the url option.
+    });
+
+    // init Typeahead
+    $('input.twitter-typeahead').typeahead(
+        {
+            minLength: 1,
+            highlight: true
+        },
+        {
+            name: 'objects',
+            source: object_suggestions,   // suggestion engine is passed as the source
+            display: function(item) {        // display: 'name' will also work
+                return item.objectid;
+            },
+            limit: 8,
+            templates: {
+                suggestion: function(item) {
+                    return '<div>'+ item.objectid + '_' + item.revision + ' (' + item.maturity +')</div>';
+                }
+            }
+        }).on('typeahead:selected', function(e, datum) {
+            console.log('selected: ' + datum);
+        });
+
+</script>
+
+{% from "macro.html" import flashed_messages %}
+{%- with messages = get_flashed_messages(with_categories=True) %}
+    {{flashed_messages(messages)}}
+{%- endwith %}
+
+{% block extrascripts %}
+{% endblock %}
+
+</body>
+</html>

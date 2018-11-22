@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Testclient{% endblock %}
+
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Testclient</h1>
+    </div>
+
+    <form action="{{ url_for("pages_app.delete_all") }}" method="post">
+        <button type="submit" class="btn btn-danger"><span data-feather="alert-octagon" class="mr-2"></span>Remove All Data</button>
+    </form>
+
+{% endblock %}
