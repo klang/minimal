@@ -115,3 +115,18 @@ An example frontend is represented in `baseline-flask` and can be started with
     flask --app=frontend --configfile=frontend.default_settings  dev -p 5000
 
 The `frontend.develop_settings` file is NOT part of the repository right now. 
+
+
+## build
+
+    python3 setup.py sdist bdist_wheel
+
+### usage
+
+    pyenv virtualenv 3.6.5 netmanager-deployment
+    echo "netmanager-deployment" > .python-version
+    pip install netmanager-web-0.0.1.tar.gz
+    # ensure that netmanager_web/settins* and runlocal.py are available
+    
+    python runlocal.py
+

@@ -98,7 +98,7 @@ def create_app(config_filename):
     app.config.from_object(config_filename)
     Bootstrap(app)
     # import blueprints
-    from pages.views import pages_app
+    from .pages.views import pages_app
     # register blueprints
     app.register_blueprint(pages_app)
 
