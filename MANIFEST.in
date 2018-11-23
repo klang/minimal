@@ -1,0 +1,2 @@
+recursive-include netmanager_web/templates *
+recursive-include netmanager_web/static *

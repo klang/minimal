@@ -18,6 +18,7 @@ setup(
         "Operating System :: OS Independent",
     ),
     include_package_data=True,
+    zip__safe=False,
     install_requires=[
         'Flask', 'flask-nav', 'flask_bootstrap', 'pytz', 'flask_wtf', 'wtforms_components', 'requests', 'retrying',
         'wtforms_json'

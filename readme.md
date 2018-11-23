@@ -119,6 +119,8 @@ The `frontend.develop_settings` file is NOT part of the repository right now.
 
 ## build
 
+    pip install --upgrade pip
+    pip install --upgrade setuptools wheel
     python3 setup.py sdist bdist_wheel
 
 ### usage
@@ -127,6 +129,6 @@ The `frontend.develop_settings` file is NOT part of the repository right now.
     echo "netmanager-deployment" > .python-version
     pip install netmanager-web-0.0.1.tar.gz
     # ensure that netmanager_web/settins* and runlocal.py are available
-    
+
     python runlocal.py
 
