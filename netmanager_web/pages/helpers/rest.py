@@ -8,8 +8,11 @@ from retrying import retry
 def retry_if_HTTP404(exception):
     return isinstance(exception, requests.exceptions.HTTPError) and exception.response.status_code == 404
 
+def retry_if_HTTP500(exception):
+    return isinstance(exception, requests.exceptions.HTTPError) and exception.response.status_code == 500
 
-# @retry(stop_max_attempt_number=5, wait_exponential_multiplier=100)
+
+@retry(stop_max_attempt_number=5, wait_exponential_multiplier=100, retry_on_exception=retry_if_HTTP500)
 def get_url(url):
     try:
         r = requests.get(url, verify=False)
